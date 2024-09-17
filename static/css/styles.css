@@ -6,17 +6,16 @@ body {
 body {
   display: flex;
   flex-direction: column;
+  min-height: 100%; /* Ensures the body takes at least the full viewport height */
+  margin: 0; /* Ensure no extra margin affects the layout */
 }
 
-.content {
-  flex: 1;
-  padding-bottom: 6em;
-  /* Add padding equal to the footer height */
+.container.content {
+  flex-grow: 1; /* Ensures the content expands to take up available space */
+  padding-bottom: 1.5em; /* Optional: Adds padding to avoid content touching the footer */
 }
 
 .my-footer {
-  position: fixed;
-  bottom: 0;
   width: 100%;
   height: 5em;
   background-color: #163b65;

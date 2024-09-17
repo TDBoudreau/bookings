@@ -1,24 +1,29 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/TDBoudreau/bookings/pkg/config"
-	"github.com/TDBoudreau/bookings/pkg/handlers"
-	"github.com/TDBoudreau/bookings/pkg/render"
+	"github.com/TDBoudreau/bookings/internal/config"
+	"github.com/TDBoudreau/bookings/internal/handlers"
+	"github.com/TDBoudreau/bookings/internal/models"
+	"github.com/TDBoudreau/bookings/internal/render"
 
 	"github.com/alexedwards/scs/v2"
 )
 
-const portNumber = ":8080"
+const portNumber = ":3020"
 
 var app config.AppConfig
 var session *scs.SessionManager
 
 func main() {
+	gob.Register(models.Reservation{})
+
+	// change this to true when in production
 	app.InProduction = false
 
 	session = scs.New()
