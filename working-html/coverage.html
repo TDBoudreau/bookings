@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>web: Go Coverage Report</title>
+    <style>
+        body {
+            background: black;
+            color: rgb(80, 80, 80);
+        }
+        body, pre, #legend span {
+            font-family: Menlo, monospace;
+            font-weight: bold;
+        }
+        #topbar {
+            background: black;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 42px;
+            border-bottom: 1px solid rgb(80, 80, 80);
+        }
+        #content {
+            margin-top: 50px;
+        }
+        #nav, #legend {
+            float: left;
+            margin-left: 10px;
+        }
+        #legend {
+            margin-top: 12px;
+        }
+        #nav {
+            margin-top: 10px;
+        }
+        #legend span {
+            margin: 0 5px;
+        }
+        .cov0 { color: rgb(192, 0, 0) }
+        .cov1 { color: rgb(128, 128, 128) }
+        .cov2 { color: rgb(116, 140, 131) }
+        .cov3 { color: rgb(104, 152, 134) }
+        .cov4 { color: rgb(92, 164, 137) }
+        .cov5 { color: rgb(80, 176, 140) }
+        .cov6 { color: rgb(68, 188, 143) }
+        .cov7 { color: rgb(56, 200, 146) }
+        .cov8 { color: rgb(44, 212, 149) }
+        .cov9 { color: rgb(32, 224, 152) }
+        .cov10 { color: rgb(20, 236, 155) }
+
+    </style>
+</head>
+<body>
+<div id="topbar">
+    <div id="nav">
+        <select id="files">
+
+            <option value="file0">github.com/TDBoudreau/bookings/cmd/web/main.go (66.7%)</option>
+
+            <option value="file1">github.com/TDBoudreau/bookings/cmd/web/middleware.go (100.0%)</option>
+
+            <option value="file2">github.com/TDBoudreau/bookings/cmd/web/routes.go (100.0%)</option>
+
+        </select>
+    </div>
+    <div id="legend">
+        <span>not tracked</span>
+
+        <span class="cov0">not covered</span>
+        <span class="cov8">covered</span>
+
+    </div>
+</div>
+<div id="content">
+
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "encoding/gob"
+        "fmt"
+        "log"
+        "net/http"
+        "time"
+
+        "github.com/TDBoudreau/bookings/internal/config"
+        "github.com/TDBoudreau/bookings/internal/handlers"
+        "github.com/TDBoudreau/bookings/internal/models"
+        "github.com/TDBoudreau/bookings/internal/render"
+
+        "github.com/alexedwards/scs/v2"
+)
+
+const portNumber = ":3020"
+
+var app config.AppConfig
+var session *scs.SessionManager
+
+func main() <span class="cov0" title="0">{
+        err := run()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("Starting application on port %s\n", portNumber)
+
+        srv := &amp;http.Server{
+                Addr:    portNumber,
+                Handler: routes(&amp;app),
+        }
+
+        err = srv.ListenAndServe()
+        log.Fatal(err)</span>
+}
+
+func run() error <span class="cov8" title="1">{
+        gob.Register(models.Reservation{})
+
+        // change this to true when in production
+        app.InProduction = false
+
+        session = scs.New()
+        session.Lifetime = 24 * time.Hour
+        session.Cookie.Persist = true
+        session.Cookie.SameSite = http.SameSiteLaxMode
+        session.Cookie.Secure = app.InProduction
+
+        app.Session = session
+
+        tc, err := render.CreateTemplateCache()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal("cannot create template cache")
+        }</span>
+
+        <span class="cov8" title="1">app.TemplateCache = tc
+        app.UseCache = false
+
+        repo := handlers.NewRepo(&amp;app)
+        handlers.NewHandlers(repo)
+        render.NewTemplates(&amp;app)
+
+        return nil</span>
+}
+</pre>
+
+    <pre class="file" id="file1" style="display: none">package main
+
+import (
+        "net/http"
+
+        "github.com/justinas/nosurf"
+)
+
+func NoSurf(next http.Handler) http.Handler <span class="cov8" title="1">{
+        csfrHandler := nosurf.New(next)
+        csfrHandler.SetBaseCookie(http.Cookie{
+                HttpOnly: true,
+                Path:     "/",
+                Secure:   app.InProduction,
+                SameSite: http.SameSiteLaxMode,
+        })
+
+        return csfrHandler
+}</span>
+
+func SessionLoad(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return session.LoadAndSave(next)
+}</span>
+</pre>
+
+    <pre class="file" id="file2" style="display: none">package main
+
+import (
+        "net/http"
+
+        "github.com/go-chi/chi/v5"
+        "github.com/go-chi/chi/v5/middleware"
+
+        "github.com/TDBoudreau/bookings/internal/config"
+        "github.com/TDBoudreau/bookings/internal/handlers"
+)
+
+func routes(app *config.AppConfig) http.Handler <span class="cov8" title="1">{
+        mux := chi.NewRouter()
+
+        mux.Use(middleware.Recoverer)
+        mux.Use(NoSurf)
+        mux.Use(SessionLoad)
+
+        mux.Get("/", handlers.Repo.Home)
+        mux.Get("/about", handlers.Repo.About)
+        mux.Get("/generals-quarters", handlers.Repo.Generals)
+        mux.Get("/majors-suite", handlers.Repo.Majors)
+
+        mux.Get("/search-availability", handlers.Repo.Availability)
+        mux.Post("/search-availability", handlers.Repo.PostAvailability)
+        mux.Post("/search-availability-json", handlers.Repo.AvailabilityJSON)
+
+        mux.Get("/contact", handlers.Repo.Contact)
+
+        mux.Get("/make-reservation", handlers.Repo.Reservation)
+        mux.Post("/make-reservation", handlers.Repo.PostReservation)
+        mux.Get("/reservation-summary", handlers.Repo.ReservationSummary)
+
+        fileServer := http.FileServer(http.Dir("./static/"))
+        mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
+        return mux
+}</span>
+</pre>
+
+</div>
+</body>
+<script>
+    (function() {
+        var files = document.getElementById('files');
+        var visible;
+        files.addEventListener('change', onChange, false);
+        function select(part) {
+            if (visible)
+                visible.style.display = 'none';
+            visible = document.getElementById(part);
+            if (!visible)
+                return;
+            files.value = part;
+            visible.style.display = 'block';
+            location.hash = part;
+        }
+        function onChange() {
+            select(files.value);
+            window.scrollTo(0, 0);
+        }
+        if (location.hash != "") {
+            select(location.hash.substr(1));
+        }
+        if (!visible) {
+            select("file0");
+        }
+    })();
+</script>
+</html>
