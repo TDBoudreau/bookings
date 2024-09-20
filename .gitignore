@@ -27,6 +27,7 @@ go.work.sum
 database.yml
 coverage.out
 
+db-data/
 /working-html/
 /working-html/*
 /html-source-bkup/

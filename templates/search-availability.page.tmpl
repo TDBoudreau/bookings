@@ -24,6 +24,7 @@
                                             type="text"
                                             name="start"
                                             placeholder="Arrival"
+                                            autocomplete="off"
                                     />
                                 </div>
                                 <div class="col-md-6">
@@ -33,6 +34,7 @@
                                             type="text"
                                             name="end"
                                             placeholder="Departure"
+                                            autocomplete="off"
                                     />
                                 </div>
                             </div>
@@ -56,6 +58,7 @@
         const elem = document.getElementById("reservation-dates");
         const rangePicker = new DateRangePicker(elem, {
             format: "yyyy-mm-dd",
+            minDate: new Date(),
         });
     </script>
 {{ end }}
