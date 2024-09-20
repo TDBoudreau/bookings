@@ -14,7 +14,7 @@ func NewHelpers(a *config.AppConfig) {
 	app = a
 }
 
-// ClientError
+// ClientError logs errors returned to the client
 func ClientError(w http.ResponseWriter, status int) {
 	app.InfoLog.Println("Client error with status of", status)
 	http.Error(w, http.StatusText(status), status)

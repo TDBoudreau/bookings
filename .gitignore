@@ -24,3 +24,10 @@ go.work.sum
 .idea
 .vscode
 *.sh
+database.yml
+coverage.out
+
+/working-html/
+/working-html/*
+/html-source-bkup/
+/html-source-bkup/*
