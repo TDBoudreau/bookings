@@ -33,7 +33,7 @@
 
         <div class="row">
             <div class="col text-center">
-                <a id="check-availability-button" href="#!" class="btn btn-success"
+                <a id="check-availability-button" href="#" class="btn btn-success"
                 >Check Availability</a
                 >
             </div>
@@ -43,80 +43,9 @@
 {{ end }}
 
 {{define "js"}}
+    <script src="/static/js/roomAvailability.js"></script>
     <script>
-        document
-            .getElementById("check-availability-button")
-            .addEventListener("click", function () {
-                let html = `
-                  <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
-                      <div class="form-row">
-                          <div class="col">
-                              <div class="form-row" id="reservation-dates-modal">
-                                  <div class="col">
-                                      <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival" autocomplete="off">
-                                  </div>
-                                  <div class="col">
-                                      <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure" autocomplete="off">
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </form>
-                  `;
-                attention.custom({
-                    title: "Choose your dates",
-                    msg: html,
-
-                    willOpen: () => {
-                        const elem = document.getElementById("reservation-dates-modal");
-                        const rp = new DateRangePicker(elem, {
-                            format: "yyyy-mm-dd",
-                            minDate: new Date(),
-                            showOnFocus: true,
-                        });
-                    },
-
-                    didOpen: () => {
-                        document.getElementById("start").removeAttribute("disabled");
-                        document.getElementById("end").removeAttribute("disabled");
-                    },
-
-                    preConfirm: () => {
-                        // Get the form element
-                        const form = document.getElementById("check-availability-form");
-                        // Trigger Bootstrap validation
-                        form.classList.add("was-validated");
-                        // Check form validity
-                        if (form.checkValidity()) {
-                            // If the form is valid, return the dates
-                            return [
-                                document.getElementById("start").value,
-                                document.getElementById("end").value,
-                            ];
-                        } else {
-                            // If the form is invalid, return false to prevent modal from closing
-                            return false;
-                        }
-                    },
-
-                    callback: function (result) {
-                        console.log("called");
-
-                        let form = document.getElementById("check-availability-form");
-                        let formData = new FormData(form);
-                        formData.append("csrf_token", "{{.CSRFToken}}");
-                        fetch("/search-availability-json", {
-                            method: "post",
-                            body: formData,
-                        })
-                            .then((response) => response.json())
-                            .then((data) => {
-                                console.log(data);
-                                console.log("ok:", data.ok);
-                                console.log("message:", data.message);
-                            });
-                    },
-                });
-            });
+        const CSRFToken = "{{.CSRFToken}}"
+        roomAvailability(1, CSRFToken)
     </script>
 {{ end }}

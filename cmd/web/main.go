@@ -36,6 +36,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}(db.SQL)
+	defer close(app.MailChan)
 
 	fmt.Printf("Starting application on port %s\n", portNumber)
 
@@ -53,6 +54,9 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Room{})
 	gob.Register(models.Reservation{})
 	gob.Register(models.Restriction{})
+
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
 
 	app.InProduction = false // change this to true when in production
 	app.InfoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
